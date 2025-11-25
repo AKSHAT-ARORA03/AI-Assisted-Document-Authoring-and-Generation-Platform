@@ -62,7 +62,7 @@ jspm_packages/
 .next
 .nuxt
 .cache/
-public
+# public - REMOVED: This was breaking React builds by ignoring public/index.html
 .vuepress/dist
 .serverless/
 .fusebox/
