@@ -34,7 +34,7 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: ALLOWED_ORIGINS
-        value: https://*.vercel.app,http://localhost:3000
+        value: https://*.vercel.app,https://ai-assisted-document-authoring.vercel.app,https://document-authoring-platform.vercel.app,http://localhost:3000
       - key: MAX_FILE_SIZE_MB
         value: 25
       - key: RATE_LIMIT_PER_MINUTE
