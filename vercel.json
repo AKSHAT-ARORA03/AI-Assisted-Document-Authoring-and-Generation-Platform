@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "_comment": "Force rebuild with public files included",
   "builds": [
     {
       "src": "frontend/package.json",
