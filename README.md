@@ -61,6 +61,13 @@ Before running this application, ensure you have:
 
 ## 🚀 Quick Start
 
+### 🌟 Try the Live Application
+**No setup required!** Visit the deployed application:
+- **Frontend**: [https://ai-assisted-document-authoring-and-delta.vercel.app](https://ai-assisted-document-authoring-and-delta.vercel.app)
+- **API Docs**: [https://ai-assisted-document-authoring-and-fdua.onrender.com/docs](https://ai-assisted-document-authoring-and-fdua.onrender.com/docs)
+
+### 💻 Local Development Setup
+
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/yourusername/ai-assisted-document-authoring.git
@@ -280,24 +287,34 @@ ai-assisted-document-authoring/
 
 ## 🚀 Deployment
 
+### 🌐 Live Application
+
+**The application is deployed and ready to use!**
+
+- **🎨 Frontend**: [https://ai-assisted-document-authoring-and-delta.vercel.app](https://ai-assisted-document-authoring-and-delta.vercel.app) (Vercel)
+- **⚡ Backend API**: [https://ai-assisted-document-authoring-and-fdua.onrender.com](https://ai-assisted-document-authoring-and-fdua.onrender.com) (Render)
+- **📚 API Documentation**: [https://ai-assisted-document-authoring-and-fdua.onrender.com/docs](https://ai-assisted-document-authoring-and-fdua.onrender.com/docs)
+
 ### Production Environment Setup
 
-#### Backend Deployment (Railway/Heroku/DigitalOcean)
-1. **Environment Configuration**: Set production environment variables
-2. **Database Setup**: Configure MongoDB Atlas production cluster
-3. **Security**: Enable HTTPS and configure secure headers
-4. **Monitoring**: Set up logging and error tracking
+#### Backend Deployment (Render)
+✅ **Deployed on Render** - Automatic deploys from main branch
+1. **Environment Configuration**: Production environment variables configured
+2. **Database Setup**: MongoDB Atlas production cluster connected
+3. **Security**: HTTPS enabled and CORS configured for Vercel frontend
+4. **Monitoring**: Health checks and logging enabled
 
 ```bash
 # Production start command
 uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
-#### Frontend Deployment (Netlify/Vercel)
-1. **Build Optimization**: Create production build
-2. **Environment Variables**: Configure production API endpoints
-3. **CDN Configuration**: Set up content delivery network
-4. **Analytics**: Implement usage analytics
+#### Frontend Deployment (Vercel)
+✅ **Deployed on Vercel** - Automatic deploys from main branch
+1. **Build Optimization**: React production build optimized
+2. **Environment Variables**: Production API endpoints configured
+3. **CDN Configuration**: Global edge network deployment
+4. **Analytics**: Performance monitoring enabled
 
 ```bash
 # Production build
