@@ -39,6 +39,7 @@ if allowed_origins_str:
             allowed_origins.extend([
                 "https://ai-document-authoring.vercel.app",
                 "https://ai-assisted-document-authoring.vercel.app", 
+                "https://ai-assisted-document-authoring-and-delta.vercel.app",
                 "https://document-authoring-platform.vercel.app"
             ])
         else:
