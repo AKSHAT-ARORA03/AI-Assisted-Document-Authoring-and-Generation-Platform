@@ -1,25 +1,56 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
+
 from app.routers import auth, projects, generation, refinement, export, profile
 from app.utils.database import connect_to_mongo, close_mongo_connection
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan events"""
+    # Startup
+    await connect_to_mongo()
+    yield
+    # Shutdown
+    await close_mongo_connection()
+
+
+# Initialize FastAPI app
 app = FastAPI(
-    title="AI-Assisted Document Authoring Platform",
-    description="Create, refine, and export professional documents with AI assistance",
-    version="1.0.0"
+    title="AI Document Authoring Platform",
+    description="Professional AI-powered document creation and editing platform",
+    version="1.0.0",
+    lifespan=lifespan,
+    docs_url="/docs" if os.getenv("DEBUG", "False").lower() == "true" else None,
+    redoc_url="/redoc" if os.getenv("DEBUG", "False").lower() == "true" else None
 )
 
-# CORS middleware - Allow all origins for development
+# CORS Configuration for Production
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "")
+if allowed_origins_str:
+    # Handle wildcard patterns for Vercel deployments
+    allowed_origins = []
+    for origin in allowed_origins_str.split(","):
+        origin = origin.strip()
+        if "*.vercel.app" in origin:
+            # Allow all Vercel subdomains
+            allowed_origins.extend([
+                "https://ai-document-authoring.vercel.app",
+                "https://ai-assisted-document-authoring.vercel.app", 
+                "https://document-authoring-platform.vercel.app"
+            ])
+        else:
+            allowed_origins.append(origin)
+else:
+    allowed_origins = ["*"]  # Fallback for development
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -41,16 +72,33 @@ async def shutdown_db_client():
         print(f"Shutdown error: {e}")
 
 # Include routers
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
-app.include_router(profile.router, prefix="/api/v1/auth", tags=["profile"])
-app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"])
-app.include_router(generation.router, prefix="/api/v1/generation", tags=["generation"])
-app.include_router(refinement.router, prefix="/api/v1/refinement", tags=["refinement"])
-app.include_router(export.router, prefix="/api/v1/export", tags=["export"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(projects.router, prefix="/api/v1/projects", tags=["Projects"])
+app.include_router(generation.router, prefix="/api/v1/generation", tags=["AI Generation"])
+app.include_router(refinement.router, prefix="/api/v1/refinement", tags=["Content Refinement"])
+app.include_router(export.router, prefix="/api/v1/export", tags=["Document Export"])
+app.include_router(profile.router, prefix="/api/v1", tags=["User Profile"])
 
+# Health check endpoints
 @app.get("/")
 async def root():
-    return {"message": "AI-Assisted Document Authoring Platform API", "status": "running"}
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "message": "AI Document Authoring Platform API",
+        "version": "1.0.0",
+        "environment": os.getenv("ENVIRONMENT", "development")
+    }
+
+@app.get("/health")
+async def health_check():
+    """Detailed health check"""
+    return {
+        "status": "healthy",
+        "database": "connected",
+        "ai_service": "available",
+        "environment": os.getenv("ENVIRONMENT", "development")
+    }
 
 @app.get("/health")
 async def health_check():

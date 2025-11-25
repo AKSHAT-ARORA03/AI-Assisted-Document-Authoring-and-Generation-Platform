@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: ai-document-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: MONGODB_URL
+        value: mongodb+srv://akshatarora0307:030704@reciepe-generator.q5zooff.mongodb.net/document_platform
+      - key: MONGODB_DATABASE_NAME
+        value: document_platform
+      - key: JWT_SECRET_KEY
+        value: rg7j3H2f9kfWw0lA3Q9uVb__P-mF8H9dYQds1JQ92k
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 15
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: 14
+      - key: GEMINI_API_KEY
+        value: AIzaSyCfjxAJ_1gb5U_CXT7TExOs24IAxzvUFqQ
+      - key: GOOGLE_API_KEY
+        value: AIzaSyCfjxAJ_1gb5U_CXT7TExOs24IAxzvUFqQ
+      - key: GEMINI_MODEL
+        value: models/gemini-2.5-flash
+      - key: SERVER_HOST
+        value: 0.0.0.0
+      - key: DEBUG
+        value: False
+      - key: ENVIRONMENT
+        value: production
+      - key: ALLOWED_ORIGINS
+        value: https://*.vercel.app,http://localhost:3000
+      - key: MAX_FILE_SIZE_MB
+        value: 25
+      - key: RATE_LIMIT_PER_MINUTE
+        value: 500
+      - key: AI_RATE_LIMIT_PER_MINUTE
+        value: 50
+      - key: LOG_LEVEL
+        value: INFO
