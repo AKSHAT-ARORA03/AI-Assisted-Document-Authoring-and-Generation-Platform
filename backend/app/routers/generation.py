@@ -133,17 +133,28 @@ async def generate_section_content(
     project_id: str,
     section_id: str,
     request: ContentGenerationRequest,
-    current_user: UserInDB = Depends(get_current_user)
+    current_user = Depends(get_current_user_optional)
 ):
-    """Generate content for a specific section"""
-    if not ObjectId.is_valid(project_id):
-        raise HTTPException(status_code=400, detail="Invalid project ID")
+    """Generate content for a specific section - MongoDB FIRST for ALL users"""
+    user_id = await get_universal_user_id(current_user)
     
+    # Try MongoDB FIRST for persistence (universal approach)
+    project = None
     collection = await get_collection("projects")
-    project = await collection.find_one({
-        "_id": ObjectId(project_id),
-        "user_id": str(current_user.id)
-    })
+    if collection is not None and ObjectId.is_valid(project_id):
+        try:
+            project_data = await collection.find_one({
+                "_id": ObjectId(project_id),
+                "user_id": user_id
+            })
+            if project_data:
+                project = project_data
+        except Exception as e:
+            print(f"MongoDB error: {e}")
+    
+    # Fallback to memory store only if MongoDB fails
+    if not project:
+        project = await memory_project_store.find_project_by_id(project_id, user_id)
     
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -184,16 +195,27 @@ async def generate_section_content(
         sections[section_index]["content"] = content
         sections[section_index]["generated_at"] = datetime.utcnow()
         
-        await collection.update_one(
-            {"_id": ObjectId(project_id)},
-            {
-                "$set": {
-                    "sections": sections,
-                    "status": "generating",
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
+        # Update project with generated content - MongoDB FIRST
+        update_data = {
+            "sections": sections,
+            "status": "generating",
+            "updated_at": datetime.utcnow()
+        }
+        
+        # Try MongoDB FIRST for persistence
+        if collection is not None and ObjectId.is_valid(project_id):
+            try:
+                await collection.update_one(
+                    {"_id": ObjectId(project_id)},
+                    {"$set": update_data}
+                )
+            except Exception as e:
+                print(f"MongoDB update error: {e}")
+                # Fallback to memory store
+                await memory_project_store.update_project(project_id, user_id, update_data)
+        else:
+            # Use memory store if MongoDB not available
+            await memory_project_store.update_project(project_id, user_id, update_data)
         
         return {
             "section_id": section_id,
@@ -212,17 +234,28 @@ async def generate_slide_content(
     project_id: str,
     slide_id: str,
     request: ContentGenerationRequest,
-    current_user: UserInDB = Depends(get_current_user)
+    current_user = Depends(get_current_user_optional)
 ):
-    """Generate content for a specific slide"""
-    if not ObjectId.is_valid(project_id):
-        raise HTTPException(status_code=400, detail="Invalid project ID")
+    """Generate content for a specific slide - MongoDB FIRST for ALL users"""
+    user_id = await get_universal_user_id(current_user)
     
+    # Try MongoDB FIRST for persistence (universal approach)
+    project = None
     collection = await get_collection("projects")
-    project = await collection.find_one({
-        "_id": ObjectId(project_id),
-        "user_id": str(current_user.id)
-    })
+    if collection is not None and ObjectId.is_valid(project_id):
+        try:
+            project_data = await collection.find_one({
+                "_id": ObjectId(project_id),
+                "user_id": user_id
+            })
+            if project_data:
+                project = project_data
+        except Exception as e:
+            print(f"MongoDB error: {e}")
+    
+    # Fallback to memory store only if MongoDB fails
+    if not project:
+        project = await memory_project_store.find_project_by_id(project_id, user_id)
     
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -263,16 +296,27 @@ async def generate_slide_content(
         slides[slide_index]["content"] = bullet_points
         slides[slide_index]["generated_at"] = datetime.utcnow()
         
-        await collection.update_one(
-            {"_id": ObjectId(project_id)},
-            {
-                "$set": {
-                    "slides": slides,
-                    "status": "generating",
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
+        # Update project with generated content - MongoDB FIRST
+        update_data = {
+            "slides": slides,
+            "status": "generating",
+            "updated_at": datetime.utcnow()
+        }
+        
+        # Try MongoDB FIRST for persistence
+        if collection is not None and ObjectId.is_valid(project_id):
+            try:
+                await collection.update_one(
+                    {"_id": ObjectId(project_id)},
+                    {"$set": update_data}
+                )
+            except Exception as e:
+                print(f"MongoDB update error: {e}")
+                # Fallback to memory store
+                await memory_project_store.update_project(project_id, user_id, update_data)
+        else:
+            # Use memory store if MongoDB not available
+            await memory_project_store.update_project(project_id, user_id, update_data)
         
         return {
             "slide_id": slide_id,
@@ -289,7 +333,7 @@ async def generate_slide_content(
 @router.post("/all-sections/{project_id}")
 async def generate_all_sections(
     project_id: str,
-    current_user: UserInDB = Depends(get_current_user_optional)
+    current_user = Depends(get_current_user_optional)
 ):
     """INTELLIGENT WORKFLOW: Generate content for all sections/slides. Auto-creates outline if missing!"""
     user_id = await get_universal_user_id(current_user)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -8,8 +8,7 @@ import {
   ThumbsDown,
   MessageSquare,
   History,
-  RefreshCw,
-  Save
+  RefreshCw
 } from 'lucide-react';
 import { 
   projectsAPI, 
@@ -30,11 +29,7 @@ const ProjectEditor = () => {
   const [refinementResults, setRefinementResults] = useState({});
   const [comments, setComments] = useState({});
 
-  useEffect(() => {
-    fetchProject();
-  }, [id]);
-
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     try {
       const projectData = await projectsAPI.getProject(id);
       setProject(projectData);
@@ -44,7 +39,11 @@ const ProjectEditor = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
+
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
 
   const generateContent = async (itemId, isSlide = false) => {
     setGenerating({ ...generating, [itemId]: true });

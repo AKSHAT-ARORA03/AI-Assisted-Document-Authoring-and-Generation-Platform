@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 
@@ -28,17 +28,7 @@ const Profile = () => {
     defaultFormat: 'word'
   });
 
-  useEffect(() => {
-    if (user) {
-      // Load real profile data from backend
-      loadProfileData();
-      fetchUserStats();
-      fetchUserActivities();
-      fetchUserPreferences();
-    }
-  }, [user]);
-
-  const loadProfileData = async () => {
+  const loadProfileData = useCallback(async () => {
     try {
       const profile = await authAPI.getProfile();
       setProfileData({
@@ -61,34 +51,44 @@ const Profile = () => {
         location: ''
       });
     }
-  };
+  }, [user]);
 
-  const fetchUserStats = async () => {
+  const fetchUserStats = useCallback(async () => {
     try {
       const response = await authAPI.getStats();
       setStats(response);
     } catch (error) {
       console.error('Error fetching user stats:', error);
     }
-  };
+  }, []);
 
-  const fetchUserActivities = async () => {
+  const fetchUserActivities = useCallback(async () => {
     try {
       const response = await authAPI.getActivities();
       setActivities(response);
     } catch (error) {
       console.error('Error fetching user activities:', error);
     }
-  };
+  }, []);
 
-  const fetchUserPreferences = async () => {
+  const fetchUserPreferences = useCallback(async () => {
     try {
       const response = await authAPI.getPreferences();
       setPreferences(response);
     } catch (error) {
       console.error('Error fetching user preferences:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      // Load real profile data from backend
+      loadProfileData();
+      fetchUserStats();
+      fetchUserActivities();
+      fetchUserPreferences();
+    }
+  }, [user, loadProfileData, fetchUserStats, fetchUserActivities, fetchUserPreferences]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -108,7 +108,7 @@ const Profile = () => {
   const handleSaveProfile = async () => {
     try {
       // Call backend API directly to save profile
-      const updatedProfile = await authAPI.updateProfile(profileData);
+      await authAPI.updateProfile(profileData);
       
       // Update the user context if the auth context has an update method
       if (updateUserProfile) {

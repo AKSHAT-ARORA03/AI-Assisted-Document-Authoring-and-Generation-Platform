@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Plus, 
@@ -23,11 +23,7 @@ const Dashboard = () => {
   const [menuOpen, setMenuOpen] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       const projectsData = await projectsAPI.getProjects({
         search: searchTerm,
@@ -40,7 +36,11 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, filter]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const handleSearch = () => {
     setLoading(true);

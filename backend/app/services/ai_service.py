@@ -130,7 +130,8 @@ class AIService:
             return response.text.strip()
         except Exception as e:
             print(f"Error generating section content: {e}")
-            return f"This section will cover important aspects of {section_title} related to {topic}. Please refine this content to get detailed information."
+            # Better error message that clearly indicates AI failure
+            raise Exception(f"AI content generation failed: {str(e)}. Please try again or contact support if the issue persists.")
     
     @staticmethod
     async def generate_slide_content(
@@ -167,12 +168,8 @@ class AIService:
             return bullets[:num_bullets]  # Ensure we return exactly the requested number
         except Exception as e:
             print(f"Error generating slide content: {e}")
-            return [
-                f"Key aspect of {slide_title}",
-                f"Important consideration for {topic}",
-                f"Strategic approach to implementation",
-                f"Expected outcomes and benefits"
-            ]
+            # Better error message that clearly indicates AI failure
+            raise Exception(f"AI slide content generation failed: {str(e)}. Please try again or contact support if the issue persists.")
     
     @staticmethod
     async def refine_content(

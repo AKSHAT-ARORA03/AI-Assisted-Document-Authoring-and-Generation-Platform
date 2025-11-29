@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [devLoginAttempted, setDevLoginAttempted] = useState(false);
+  const [devLoginAttempted] = useState(false);
 
   // Clerk hooks (always call hooks to avoid React hooks rules violation)
   const clerkUser = useUser();
